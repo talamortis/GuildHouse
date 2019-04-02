@@ -191,6 +191,8 @@ public:
     {
         if (newZone = 876)
             CheckPlayer(player);
+        else
+            player->SetPhaseMask(GetNormalPhase(player), true);
     }
 
     uint32 GetNormalPhase(Player* player) const
@@ -242,7 +244,7 @@ public:
             player->SetPhaseMask(guildData->phase, true);
         }
         else
-            player->SetPhaseMask(GetNormalPhase(player), false);
+            player->SetPhaseMask(GetNormalPhase(player), true);
     }
 
     void teleport(Player* player)
