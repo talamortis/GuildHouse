@@ -100,7 +100,6 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Go Back!", GOSSIP_SENDER_MAIN, 9);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, m_creature->GetGUID());
             break;
-            break;
         case 6: // Auctioneer
         {
             uint32 auctioneer = 0;
