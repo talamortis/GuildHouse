@@ -44,7 +44,7 @@ public:
         player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Spawn Auctioneer", GOSSIP_SENDER_MAIN, 6, "Spawn auctioneer", GuildHouseAuctioneer, false);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Spawn Primary Profession Trainers", GOSSIP_SENDER_MAIN, 7);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Spawn Secondry Profession Trainers", GOSSIP_SENDER_MAIN, 8);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Spawn Sprirt Healer", GOSSIP_SENDER_MAIN, 6491, "Spawn Spirit Healer?, GuildHouseSpirit, false);
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Spawn Sprirt Healer", GOSSIP_SENDER_MAIN, 6491, "Spawn Spirit Healer?", GuildHouseSpirit, false);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
@@ -356,7 +356,7 @@ public:
         GuildHouseObject = sConfigMgr->GetIntDefault("GuildHouseObject", 500000);
         GuildHousePortal = sConfigMgr->GetIntDefault("GuildHousePortal", 500000);
         GuildHouseProff = sConfigMgr->GetIntDefault("GuildHouseProff", 500000);
-        GuildHouseSpirit = sConfigMgr->GetIntDefault("GuildHouseSpirit, 100000);
+        GuildHouseSpirit = sConfigMgr->GetIntDefault("GuildHouseSpirit", 100000);
     }
 };
 
