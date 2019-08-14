@@ -10,7 +10,7 @@
 #include "GameObject.h"
 #include "Transport.h"
 
-int cost, GuildHouseInnKeeper, GuildHouseBank, GuildHouseMailBox, GuildHouseAuctioneer, GuildHouseTrainer, GuildHouseVendor, GuildHouseObject, GuildHousePortal, GuildHouseProff;
+int cost, GuildHouseInnKeeper, GuildHouseBank, GuildHouseMailBox, GuildHouseAuctioneer, GuildHouseTrainer, GuildHouseVendor, GuildHouseObject, GuildHousePortal, GuildHouseSpirit, GuildHouseProff;
 
 class GuildHouseSpawner : public CreatureScript {
 
@@ -44,6 +44,7 @@ public:
         player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Spawn Auctioneer", GOSSIP_SENDER_MAIN, 6, "Spawn auctioneer", GuildHouseAuctioneer, false);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Spawn Primary Profession Trainers", GOSSIP_SENDER_MAIN, 7);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Spawn Secondry Profession Trainers", GOSSIP_SENDER_MAIN, 8);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Spawn Sprirt Healer", GOSSIP_SENDER_MAIN, 6491, "Spawn Spirit Healer?, GuildHouseSpirit, false);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
@@ -167,7 +168,8 @@ public:
         case 33618: // Skinning
         case 33608: // Alchemy
         case 33616: // Herbalism
-        case 33613: // Tailoring
+      
+            case 33613: // Tailoring
         case 33619: // Cooking
         case 33623: // Fishing 
         case 33621: // First Aid
@@ -187,6 +189,10 @@ public:
             cost = GuildHouseMailBox;
             SpawnObject(action, player);
             break;
+        case 6491:  // spirit healer   
+            cost = GuildHouseSpirit;
+            SpawnNPC(action, player);
+            break;               
         case 1685:  // forge
         case 4087:  // Anvil
         case 187293: // Guild Vault
@@ -350,6 +356,7 @@ public:
         GuildHouseObject = sConfigMgr->GetIntDefault("GuildHouseObject", 500000);
         GuildHousePortal = sConfigMgr->GetIntDefault("GuildHousePortal", 500000);
         GuildHouseProff = sConfigMgr->GetIntDefault("GuildHouseProff", 500000);
+        GuildHouseSpirit = sConfigMgr->GetIntDefault("GuildHouseSpirit, 100000);
     }
 };
 

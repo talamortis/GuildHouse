@@ -91,7 +91,8 @@ REPLACE INTO `guild_house_spawns` (`id`, `entry`, `posX`, `posY`, `posZ`, `orien
 	(46, 28692, 16230.2, 16316.4, 20.8455, 6.25643, 'Trade Supplies'),
 	(48, 28776, 16236.3, 16316.1, 20.8454, 3.06771, 'Tabard Vendor'),
 	(49, 29715, 16223.7, 16293.3, 20.852, 4.57958, 'Food & Drink'),
-	(50, 191028, 16255.5, 16304.9, 20.9785, 2.97516, 'Barber Chair (Object)');
+    (50, 6491, 16218.6, 16241.1, 24.681, 2.298720, 'Spirit Healer'),
+	(51, 191028, 16255.5, 16304.9, 20.9785, 2.97516, 'Barber Chair (Object)');
 	
 /*!40000 ALTER TABLE `guild_house_spawns` ENABLE KEYS */;
 
