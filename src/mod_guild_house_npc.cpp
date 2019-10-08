@@ -170,7 +170,8 @@ public:
         case 33618: // Skinning
         case 33608: // Alchemy
         case 33616: // Herbalism
-        case 33613: // Tailoring
+      
+            case 33613: // Tailoring
         case 33619: // Cooking
         case 33623: // Fishing 
         case 33621: // First Aid
