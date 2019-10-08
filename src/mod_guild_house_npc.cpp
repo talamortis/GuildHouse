@@ -74,6 +74,7 @@ public:
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Trade Supplies", GOSSIP_SENDER_MAIN, 28692, "Spawn Trade Supplies?", GuildHouseVendor, false);
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Tabard Vendor", GOSSIP_SENDER_MAIN, 28776, "Spawn Tabard Vendor?", GuildHouseVendor, false);
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Food & Drink", GOSSIP_SENDER_MAIN, 29715, "Spawn Food & Drink?", GuildHouseVendor, false);
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Reagent Vendor", GOSSIP_SENDER_MAIN, 29636, "Spawn Reagent Vendor?", GuildHouseVendor, false);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Go Back!", GOSSIP_SENDER_MAIN, 9);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, m_creature->GetGUID());
             break;
@@ -96,6 +97,7 @@ public:
                 player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TAXI, "Portal: Silvermoon", GOSSIP_SENDER_MAIN, 183324, "Add Silvermoon Portal?", GuildHousePortal,  false);
             }
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TAXI, "Portal: Dalaran", GOSSIP_SENDER_MAIN, 191164, "Add Dalaran Portal?", GuildHousePortal,  false);
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TAXI, "Portal: Shattrath", GOSSIP_SENDER_MAIN, 191013, "Add Shattrath Portal?", GuildHousePortal, false);
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Guild Vault", GOSSIP_SENDER_MAIN, 187293, "Add Guild Vault?", GuildHouseObject,  false);
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Barber Chair", GOSSIP_SENDER_MAIN, 191028, "Add a Barber Chair?", GuildHouseObject,  false);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Go Back!", GOSSIP_SENDER_MAIN, 9);
@@ -168,8 +170,7 @@ public:
         case 33618: // Skinning
         case 33608: // Alchemy
         case 33616: // Herbalism
-      
-            case 33613: // Tailoring
+        case 33613: // Tailoring
         case 33619: // Cooking
         case 33623: // Fishing 
         case 33621: // First Aid
@@ -179,6 +180,7 @@ public:
         case 28692: // Trade supplies
         case 28776: // Tabard Vendor
         case 29715: // Food & Drink
+        case 29636: // Reagent Vendor
             cost = GuildHouseProff;
             SpawnNPC(action, player);
             break;
@@ -209,6 +211,7 @@ public:
         case 183324: // Silvermoon Portal
         case 183321: // Exodar Portal
         case 191164: // Dalaran Portal
+        case 191013: // Shattrath Portal
             cost = GuildHousePortal;
             SpawnObject(action, player);
             break;
