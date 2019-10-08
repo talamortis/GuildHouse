@@ -4,19 +4,26 @@
 
 ## Description
 
-This is a phased guild house system for Azerothcore, it allows players to from the same guild to visit their guild house to explore, train ect
-All guilds will get their own phasing system which then the guild master will have to purchase NPC's creatures and other stuff to complete the creation. 
+This is a phased guild house system for Azerothcore, it allows players to from the same guild to visit their guild house.
+All guilds will get their own phasing system which then the guild master will have to purchase NPC's creatures and other stuff to complete the creation.
 
+### Purchasables
+
+* Class Trainers (all available in Wrath)
+* Primary Profession Trainers (all available in Wrath)
+* Secondary Profession Trainers (all available in Wrath)
+* Vendors: Reagents, Food & Water and Trade Goods
+* Portals to Neutral, Horde and Alliance cities
+* Spirit Healer
+* Guild Bank and Personal Bank access
+* Auctioneer
 
 ## How to use ingame
-Once a player has brought a guild house from the NPC they can either teleport to the guildhouse by via the NPC or do .guildhouse tele
-
-Once the player is in the location of the guild house the guild master has a command .guildhouse spawnnpc this will allow the guild master
-to start placing objects / npc within the guild house.
+1) Purchase a guild house from the NPC (entry:55005), then either teleport to the guildhouse via the NPC or chat: `.guildhouse tele`
+2) Once the player is in the location of the guild house the guild master has a command .guildhouse spawnnpc this will load the Guild House Assistant.
+3) Speak with the Guild House Assistant to begin purchasing objects
 
 ## Requirements
-
-My new module requires:
 
 - AzerothCore v1.0.1+
 
@@ -28,9 +35,9 @@ My new module requires:
 3) Apply the guildhouse.patch to your source 
 4) Re-run cmake and launch a clean build of AzerothCore.
 ```
-## Patch Information
+## Patch Information (guildhouse.patch)
 
-The patch basicly turns the selected area from a bitmask to a uint, this fixes the issues with the phasing
+The patch basically turns the selected area from a bitmask to a uint, this fixes the issues with the phasing
 
 Before Patch :
 Guild 1 Can see phase 1
@@ -46,7 +53,8 @@ If you need to change the module configuration, go to your server configuration 
 
 ## Credits
 
-* [Me](https://github.com/talamortis) (author of the module)
+* [Talamortis](https://github.com/talamortis) (Original author of the module)
 * [Rochet2](https://github.com/Rochet2/): Thanks for the help with the phasing situation & General support
+* [Anhanga] (https://github.com/rbedfordpro)
 
-AzerothCore: [repository](https://github.com/azerothcore) - [website](http://azerothcore.org/) - [discord chat community](https://discord.gg/PaqQRkd)
+AzerothCore: [repository](https://github.com/azerothcore) - [website](http://azerothcore.org/) - [discord chat community](https://discord.gg/64FH6Y8)
