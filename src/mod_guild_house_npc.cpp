@@ -10,7 +10,7 @@
 #include "GameObject.h"
 #include "Transport.h"
 
-int cost, GuildHouseInnKeeper, GuildHouseBank, GuildHouseMailBox, GuildHouseAuctioneer, GuildHouseTrainer, GuildHouseVendor, GuildHouseObject, GuildHousePortal, GuildHouseSpirit, GuildHouseProff;
+int cost, GuildHouseInnKeeper, GuildHouseBank, GuildHouseMailBox, GuildHouseAuctioneer, GuildHouseTrainer, GuildHouseVendor, GuildHouseObject, GuildHousePortal, GuildHouseSpirit, GuildHouseProff, GuildHouseBuyRank;
 
 class GuildHouseSpawner : public CreatureScript {
 
@@ -22,9 +22,12 @@ public:
 
         if (player->GetGuild())
         {
+            // WIP - Anhanga
+            //Member const* memberMe = GetMember(player->GetGUID());
+            //if (memberMe->GetRankId() <= GuildHouseBuyRank)
             if (player->GetGuild()->GetLeaderGUID() != player->GetGUID())
             {
-                ChatHandler(player->GetSession()).PSendSysMessage("You are not the guild leader, sorry i cant do business with you");
+                ChatHandler(player->GetSession()).PSendSysMessage("You are not authorized to make guild house purchases.");
                 return false;
             }
         }
@@ -35,16 +38,16 @@ public:
         }
 
         player->PlayerTalkClass->ClearMenus();
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Spawn Innkeeper", GOSSIP_SENDER_MAIN, 18649, "Add a Innkeeper?", GuildHouseInnKeeper, false);
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Spawn Innkeeper", GOSSIP_SENDER_MAIN, 18649, "Add an Innkeeper?", GuildHouseInnKeeper, false);
         player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Spawn Mailbox", GOSSIP_SENDER_MAIN, 184137, "Spawn a mailbox?", GuildHouseMailBox, false);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Spawn Class Trainer", GOSSIP_SENDER_MAIN, 2);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Spawn Vendor", GOSSIP_SENDER_MAIN, 3);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Spawn City Portals / Objects", GOSSIP_SENDER_MAIN, 4);
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Spawn Bank", GOSSIP_SENDER_MAIN, 30605, "Spawn banker?", GuildHouseBank, false);
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Spawn Auctioneer", GOSSIP_SENDER_MAIN, 6, "Spawn auctioneer", GuildHouseAuctioneer, false);
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Spawn Bank", GOSSIP_SENDER_MAIN, 30605, "Spawn a banker?", GuildHouseBank, false);
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Spawn Auctioneer", GOSSIP_SENDER_MAIN, 6, "Spawn an auctioneer", GuildHouseAuctioneer, false);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Spawn Primary Profession Trainers", GOSSIP_SENDER_MAIN, 7);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Spawn Secondry Profession Trainers", GOSSIP_SENDER_MAIN, 8);
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Spawn Sprirt Healer", GOSSIP_SENDER_MAIN, 6491, "Spawn Spirit Healer?", GuildHouseSpirit, false);
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Spawn Sprirt Healer", GOSSIP_SENDER_MAIN, 6491, "Spawn a Spirit Healer?", GuildHouseSpirit, false);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
@@ -81,7 +84,7 @@ public:
         case 4: //objects / portals
             player->PlayerTalkClass->ClearMenus();
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Forge", GOSSIP_SENDER_MAIN, 1685, "Add a forge?", GuildHouseObject, false);
-            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Anvil", GOSSIP_SENDER_MAIN, 4087, "Add a Anvil?", GuildHouseObject, false);
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TALK, "Anvil", GOSSIP_SENDER_MAIN, 4087, "Add an Anvil?", GuildHouseObject, false);
             if (player->GetTeamId() == TEAM_ALLIANCE)
             {
                 player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TAXI, "Portal: Stormwind", GOSSIP_SENDER_MAIN, 183325, "Add Stormwind Portal?", GuildHousePortal, false);
@@ -361,6 +364,7 @@ public:
         GuildHousePortal = sConfigMgr->GetIntDefault("GuildHousePortal", 500000);
         GuildHouseProff = sConfigMgr->GetIntDefault("GuildHouseProff", 500000);
         GuildHouseSpirit = sConfigMgr->GetIntDefault("GuildHouseSpirit", 100000);
+        GuildHouseBuyRank = sConfigMgr->GetIntDefault("GuildHouseBuyRank", 1);
     }
 };
 
