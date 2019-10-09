@@ -19,9 +19,10 @@ All guilds will get their own phasing system which then the guild master will ha
 * Auctioneer
 
 ## How to use ingame
-1) Purchase a guild house from the NPC (entry:55005), then either teleport to the guildhouse via the NPC or chat: `.guildhouse tele`
-2) Once the player is in the location of the guild house the guild master has a command .guildhouse spawnnpc this will load the Guild House Assistant.
-3) Speak with the Guild House Assistant to begin purchasing objects - to allow ranks other than Guild Master the privilege of making purchases, modify the .conf file's GuildHouseBuyRank value.
+1) As GM: .npc add 70101 -> somewhere public and accessible by other players.
+2) Purchase a guild house from the added NPC, then either teleport to the guildhouse via the NPC or chat: `.guildhouse tele`
+3) Once the player is in the location of the guild house the guild master has a command .guildhouse spawnnpc this will load the Guild House Assistant.
+4) Speak with the Guild House Assistant to begin purchasing objects.
 
 ## Requirements
 
