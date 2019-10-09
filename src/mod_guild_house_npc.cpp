@@ -30,7 +30,7 @@ public:
             Guild::Member const* memberMe = guild->GetMember(player->GetGUID());
             if ((int)memberMe->GetRankId() > GuildHouseBuyRank)
             {
-                ChatHandler(player->GetSession()).PSendSysMessage("You are not authorized to make guild house purchases (RankId: %hhu | %d).", memberMe->GetRankId(), GuildHouseBuyRank);
+                ChatHandler(player->GetSession()).PSendSysMessage("You are not authorized to make guild house purchases.");
                 return false;
             }
         }
