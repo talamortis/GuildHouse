@@ -76,14 +76,3 @@ GuildHouseProff = 500000
 # default = 100000 (10g)
 #
 GuildHouseSpirit = 100000
-
-# GuildHouseBuyRank
-#
-# Minimum GuildRank able to make purchases in guild house
-# default = 0 (Guild Master)
-# GR_GUILDMASTER  = 0
-# GR_OFFICER      = 1
-# GR_VETERAN      = 2 ... etc
-#
-GuildHouseBuyRank = 0
-
