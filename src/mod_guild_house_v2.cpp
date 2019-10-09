@@ -9,6 +9,9 @@
 #include "DataMap.h"
 #include "GameObject.h"
 #include "Transport.h"
+#include "Chat.h"
+#include "ScriptedGossip.h"
+#include "SpellAuraEffects.h"
 
 class GuildData : public DataMap::Base
 {

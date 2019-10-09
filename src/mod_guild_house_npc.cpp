@@ -9,6 +9,10 @@
 #include "DataMap.h"
 #include "GameObject.h"
 #include "Transport.h"
+#include "Chat.h"
+#include "ScriptedGossip.h"
+#include "SpellAuraEffects.h"
+#include "CreatureAI.h"
 
 int cost, GuildHouseInnKeeper, GuildHouseBank, GuildHouseMailBox, GuildHouseAuctioneer, GuildHouseTrainer, GuildHouseVendor, GuildHouseObject, GuildHousePortal, GuildHouseSpirit, GuildHouseProff, GuildHouseBuyRank;
 
@@ -25,7 +29,7 @@ public:
             // WIP - Anhanga
             Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId());
             Guild::Member const* memberMe = guild->GetMember(player->GetGUID());
-            if (memberMe->GetRankId() <= GuildHouseBuyRank)
+            if ((int)memberMe->GetRankId() > GuildHouseBuyRank)
             //if (player->GetGuild()->GetLeaderGUID() != player->GetGUID())
             {
                 ChatHandler(player->GetSession()).PSendSysMessage("You are not authorized to make guild house purchases (RankId: %hhu | %d).", memberMe->GetRankId(), GuildHouseBuyRank);
