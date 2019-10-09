@@ -23,11 +23,12 @@ public:
         if (player->GetGuild())
         {
             // WIP - Anhanga
-            //Member const* memberMe = GetMember(player->GetGUID());
-            //if (memberMe->GetRankId() <= GuildHouseBuyRank)
-            if (player->GetGuild()->GetLeaderGUID() != player->GetGUID())
+            Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId());
+            Guild::Member const* memberMe = guild->GetMember(player->GetGUID());
+            if (memberMe->GetRankId() <= GuildHouseBuyRank)
+            //if (player->GetGuild()->GetLeaderGUID() != player->GetGUID())
             {
-                ChatHandler(player->GetSession()).PSendSysMessage("You are not authorized to make guild house purchases.");
+                ChatHandler(player->GetSession()).PSendSysMessage("You are not authorized to make guild house purchases (RankId: %hhu | %d).", memberMe->GetRankId(), GuildHouseBuyRank);
                 return false;
             }
         }
@@ -364,7 +365,7 @@ public:
         GuildHousePortal = sConfigMgr->GetIntDefault("GuildHousePortal", 500000);
         GuildHouseProff = sConfigMgr->GetIntDefault("GuildHouseProff", 500000);
         GuildHouseSpirit = sConfigMgr->GetIntDefault("GuildHouseSpirit", 100000);
-        GuildHouseBuyRank = sConfigMgr->GetIntDefault("GuildHouseBuyRank", 1);
+        GuildHouseBuyRank = sConfigMgr->GetIntDefault("GuildHouseBuyRank", 0);
     }
 };
 
