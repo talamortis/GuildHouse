@@ -3,15 +3,15 @@
 #include "Configuration/Config.h"
 #include "Creature.h"
 #include "Guild.h"
+#include "SpellAuraEffects.h"
+#include "Chat.h"
+#include "ScriptedGossip.h"
 #include "GuildMgr.h"
 #include "Define.h"
 #include "GossipDef.h"
 #include "DataMap.h"
 #include "GameObject.h"
 #include "Transport.h"
-#include "Chat.h"
-#include "ScriptedGossip.h"
-#include "SpellAuraEffects.h"
 
 class GuildData : public DataMap::Base
 {
@@ -30,7 +30,7 @@ public:
 
     GuildHelper() : GuildScript("GuildHelper") { }
 
-    void OnCreate(Guild* guild, Player* leader, const std::string& name)
+    void OnCreate(Guild*, Player* leader, const std::string&)
     {
         ChatHandler(leader->GetSession()).PSendSysMessage("You now own a guild. You can purchase a guild house!");
     }
@@ -63,13 +63,13 @@ public:
         if (player->GetGuild()->GetLeaderGUID() == player->GetGUID())
         {
             // Only leader of the guild can buy / sell guild house
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TABARD, "Buy Guild House!", GOSSIP_SENDER_MAIN, 2);
-            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_TABARD, "Sell Guild House!", GOSSIP_SENDER_MAIN, 3, "Are you sure you want to sell your Guild house?", NULL, false);
+            AddGossipItemFor(player, GOSSIP_ICON_TABARD, "Buy Guild House!", GOSSIP_SENDER_MAIN, 2);
+            AddGossipItemFor(player, GOSSIP_ICON_TABARD, "Sell Guild House!", GOSSIP_SENDER_MAIN, 3, "Are you sure you want to sell your Guild house?", NULL, false);
         }
 
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TABARD, "Teleport to Guild House", GOSSIP_SENDER_MAIN, 1);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Close", GOSSIP_SENDER_MAIN, 5);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        AddGossipItemFor(player, GOSSIP_ICON_TABARD, "Teleport to Guild House", GOSSIP_SENDER_MAIN, 1);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Close", GOSSIP_SENDER_MAIN, 5);
+        SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
 
@@ -89,7 +89,7 @@ public:
             posZ = 13.257628f;
             break;
         case 5: // close
-            player->CLOSE_GOSSIP_MENU();
+            CloseGossipMenuFor(player);
             break;
         case 3: // Sell back guild house
         {
@@ -139,14 +139,14 @@ public:
         if (result)
         {
             ChatHandler(player->GetSession()).PSendSysMessage("You cant buy any more guilds houses!");
-            player->CLOSE_GOSSIP_MENU();
+            CloseGossipMenuFor(player);
             return false;
         }
 
-        player->PlayerTalkClass->ClearMenus();
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "GM Island", GOSSIP_SENDER_MAIN, 100, "Buy GM island Guildhouse?", sConfigMgr->GetIntDefault("CostGuildHouse", 10000000), false);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, " ----- More to Come ----", GOSSIP_SENDER_MAIN, 4);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        ClearGossipMenuFor(player);
+        AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, "GM Island", GOSSIP_SENDER_MAIN, 100, "Buy GM island Guildhouse?", sConfigMgr->GetIntDefault("CostGuildHouse", 10000000), false);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, " ----- More to Come ----", GOSSIP_SENDER_MAIN, 4);
+        SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
 
     }
