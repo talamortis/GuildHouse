@@ -30,7 +30,7 @@ public:
 
     GuildHelper() : GuildScript("GuildHelper") { }
 
-    void OnCreate(Guild* guild, Player* leader, const std::string& name)
+    void OnCreate(Guild*, Player* leader, const std::string& name)
     {
         ChatHandler(leader->GetSession()).PSendSysMessage("You now own a guild. You can purchase a guild house!");
     }
@@ -73,7 +73,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player *player, Creature * m_creature, uint32 sender, uint32 action)
+    bool OnGossipSelect(Player *player, Creature * m_creature, uint32, uint32 action)
     {
         uint32 map;
         float posX;
