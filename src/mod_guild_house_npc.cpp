@@ -219,7 +219,8 @@ public:
         case 183324: // Silvermoon Portal
         case 183321: // Exodar Portal
         case 191164: // Dalaran Portal
-        case 191013: // Shattrath Portal
+        case 191013: // Shattrath Portal:Alliance
+        case 191014: // Shattrath Portal:Horde
             cost = GuildHousePortal;
             SpawnObject(action, player);
             break;

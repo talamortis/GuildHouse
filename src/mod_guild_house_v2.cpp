@@ -73,7 +73,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player *player, Creature * m_creature, uint32 sender, uint32 action)
+    bool OnGossipSelect(Player *player, Creature * m_creature, uint32, uint32 action)
     {
         uint32 map;
         float posX;
@@ -197,7 +197,8 @@ public:
         else
             player->SetPhaseMask(GetNormalPhase(player), true);
     }
-
+/*
+    // WIP - Anhanga, per Stoabrogga suggestion
     uint32 GetNormalPhase(Player* player) const
     {
         if (player->IsGameMaster())
@@ -211,6 +212,18 @@ public:
             return n_phase;
 
         return PHASEMASK_NORMAL;
+    }
+*/
+    uint32 GetNormalPhase(Player* player) const
+    {
+        if (player->IsGameMaster())
+            return PHASEMASK_ANYWHERE;
+
+        uint32 phase = player->GetPhaseByAuras();
+        if (!phase)
+            return PHASEMASK_NORMAL;
+        else
+            return phase;
     }
 
     void CheckPlayer(Player* player)
