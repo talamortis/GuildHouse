@@ -357,7 +357,7 @@ class GuildHouseNPCConf : public WorldScript
 public:
     GuildHouseNPCConf() : WorldScript("GuildHouseNPCConf") {}
 
-    void OnBeforeConfigLoad(bool reload) override
+    void OnBeforeConfigLoad(bool /*reload*/) override
     {
         GuildHouseInnKeeper = sConfigMgr->GetIntDefault("GuildHouseInnKeeper", 1000000);
         GuildHouseBank = sConfigMgr->GetIntDefault("GuildHouseBank", 1000000);
