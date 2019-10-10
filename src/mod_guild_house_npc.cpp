@@ -79,8 +79,9 @@ public:
             ClearGossipMenuFor(player);
             AddGossipItemFor(player, GOSSIP_ICON_TALK, "Trade Supplies", GOSSIP_SENDER_MAIN, 28692, "Spawn Trade Supplies?", GuildHouseVendor, false);
             AddGossipItemFor(player, GOSSIP_ICON_TALK, "Tabard Vendor", GOSSIP_SENDER_MAIN, 28776, "Spawn Tabard Vendor?", GuildHouseVendor, false);
-            AddGossipItemFor(player, GOSSIP_ICON_TALK, "Food & Drink", GOSSIP_SENDER_MAIN, 29715, "Spawn Food & Drink?", GuildHouseVendor, false);
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, "Food & Drink", GOSSIP_SENDER_MAIN, 70103, "Spawn Food & Drink?", GuildHouseVendor, false);
             AddGossipItemFor(player, GOSSIP_ICON_TALK, "Reagent Vendor", GOSSIP_SENDER_MAIN, 29636, "Spawn Reagent Vendor?", GuildHouseVendor, false);
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, "Ammo & Repair Vendor", GOSSIP_SENDER_MAIN, 70104, "Spawn Ammo & Repair Vendor?", GuildHouseVendor, false);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Go Back!", GOSSIP_SENDER_MAIN, 9);
             SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, m_creature->GetGUID());
             break;
@@ -176,8 +177,7 @@ public:
         case 33618: // Skinning
         case 33608: // Alchemy
         case 33616: // Herbalism
-      
-            case 33613: // Tailoring
+        case 33613: // Tailoring
         case 33619: // Cooking
         case 33623: // Fishing 
         case 33621: // First Aid
@@ -186,8 +186,9 @@ public:
             break;
         case 28692: // Trade supplies
         case 28776: // Tabard Vendor
-        case 29715: // Food & Drink
+        case 70103: // Food & Drink
         case 29636: // Reagent Vendor
+        case 70104: // Ammo & Repair Vendor
             cost = GuildHouseProff;
             SpawnNPC(action, player);
             break;
