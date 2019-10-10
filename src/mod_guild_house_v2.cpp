@@ -67,7 +67,7 @@ public:
 			}
 
 			WorldDatabase.PQuery("DELETE FROM `creature` WHERE map = 1 AND phaseMask = %u", GetGuildPhase(guild));
-			WorldDatabase.PQuery("DELETE FROM `gameobject WHERE map = 1 and phaseMask = %u", GetGuildPhase(guild));
+			WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE map = 1 AND phaseMask = %u", GetGuildPhase(guild));
 
 			CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", GetGuildPhase(guild));
 		}
