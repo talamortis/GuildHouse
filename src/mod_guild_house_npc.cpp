@@ -348,8 +348,7 @@ public:
         sObjectMgr->AddGameobjectToGrid(guidLow, sObjectMgr->GetGOData(guidLow));
         player->ModifyMoney(-cost);
         CloseGossipMenuFor(player);
-        CloseGossipMenuFor(player);
-    }    
+    }
 };
 
 class GuildHouseNPCConf : public WorldScript
