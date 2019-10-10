@@ -108,11 +108,8 @@ public:
 
             CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", player->GetGuildId());
 
-            if (player->GetGuildId() > 2)
-            {
-                WorldDatabase.PQuery("DELETE FROM `creature` WHERE `map` = 1 AND phaseMask = %u", player->GetGuildId());
-                WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `map` = 1 and phaseMask = %u", player->GetGuildId());
-            }
+            WorldDatabase.PQuery("DELETE FROM `creature` WHERE `map` = 1 AND phaseMask = %u", GetGuildPhase(player));
+            WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `map` = 1 and phaseMask = %u", GetGuildPhase(player));
 
             ChatHandler(player->GetSession()).PSendSysMessage("You have successfully sold your guild house");
             player->ModifyMoney(+(sConfigMgr->GetIntDefault("CostGuildHouse", 10000000) / 2));
@@ -131,7 +128,7 @@ public:
 
         if (action >= 100)
         {
-            CharacterDatabase.PQuery("INSERT INTO `guild_house` (guild, phase, map, positionX, positionY, positionZ) VALUES (%u, %u, %u, %f, %f, %f)", player->GetGuildId(), player->GetGuildId(), map, posX, posY, posZ);
+            CharacterDatabase.PQuery("INSERT INTO `guild_house` (guild, phase, map, positionX, positionY, positionZ) VALUES (%u, %u, %u, %f, %f, %f)", player->GetGuildId(), GetGuildPhase(player), map, posX, posY, posZ);
             player->ModifyMoney(-(sConfigMgr->GetIntDefault("CostGuildHouse", 10000000)));
             ChatHandler(player->GetSession()).PSendSysMessage("You have successfully purchased a guild house");
 			player->GetGuild()->BroadcastToGuild(player->GetSession(), false, "We now got a Guild House!", LANG_UNIVERSAL);
@@ -141,6 +138,10 @@ public:
         }
         return true;
     }
+
+	uint32 GetGuildPhase(Player* player) {
+		return player->GetGuildId() + 10;
+	}
 
 	void SpawnDalaranPortal(Player* player)
 	{
