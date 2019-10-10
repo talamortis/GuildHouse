@@ -227,6 +227,10 @@ public:
         return true;
     }
 
+	uint32 GetGuildPhase(Player* player) {
+		return player->GetGuildId() + 10;
+	}
+
     void SpawnNPC(uint32 entry, Player* player)
     {
         if (player->FindNearestCreature(entry, VISIBILITY_RANGE, true))
@@ -258,12 +262,12 @@ public:
 
         Creature* creature = new Creature();
 
-        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), player->GetMap(), player->GetPhaseMask(), entry, 0, posX,posY, posZ, ori))
+        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), player->GetMap(), GetGuildPhase(player), entry, 0, posX,posY, posZ, ori))
         {
             delete creature;
             return;
         }
-        creature->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), player->GetPhaseMask());
+        creature->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), GetGuildPhase(player));
         uint32 db_guid = creature->GetDBTableGUIDLow();
 
         creature->CleanupsBeforeDelete();
@@ -324,14 +328,14 @@ public:
         GameObject* object = sObjectMgr->IsGameObjectStaticTransport(objectInfo->entry) ? new StaticTransport() : new GameObject();
         uint32 guidLow = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-        if (!object->Create(guidLow, objectInfo->entry, player->GetMap(), player->GetPhaseMask(), posX, posY, posZ, ori, G3D::Quat(), 0, GO_STATE_READY))
+        if (!object->Create(guidLow, objectInfo->entry, player->GetMap(), GetGuildPhase(player), posX, posY, posZ, ori, G3D::Quat(), 0, GO_STATE_READY))
         {
             delete object;
             return;
         }
 
         // fill the gameobject data and save to the db
-        object->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), player->GetPhaseMask());
+        object->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), GetGuildPhase(player));
         // delete the old object and do a clean load from DB with a fresh new GameObject instance.
         // this is required to avoid weird behavior and memory leaks
         delete object;

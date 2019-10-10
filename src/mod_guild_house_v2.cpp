@@ -12,6 +12,7 @@
 #include "DataMap.h"
 #include "GameObject.h"
 #include "Transport.h"
+#include <Maps\MapManager.h>
 
 class GuildData : public DataMap::Base
 {
@@ -35,15 +36,41 @@ public:
         ChatHandler(leader->GetSession()).PSendSysMessage("You now own a guild. You can purchase a guild house!");
     }
 
-    void OnGuildDisband(Guild* guild)
-    {
-        if (guild->GetId() > 2)
-        {
-            WorldDatabase.PQuery("DELETE FROM `creature` WHERE map = 1 AND phaseMask = %u", guild->GetId());
-            WorldDatabase.PQuery("DELETE FROM `gameobject WHERE map = 1 and phaseMask = %u", guild->GetId());
-        }
+	uint32 GetGuildPhase(Guild* guild) {
+		return guild->GetId() + 10;
+	}
 
-        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", guild->GetId());
+	void OnRemoveMember(Guild* guild, Player* player, bool isDisbanding, bool /*isKicked*/)
+    {
+		if (isDisbanding) {
+			QueryResult result = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(guild));
+
+			if (result) {
+				Map* creatureMap = sMapMgr->FindMap(1, 0);
+				Creature* creature = nullptr;
+				do
+				{
+
+					Field* fields = result->Fetch();
+					uint64 lowguid = fields[0].GetInt64();
+					
+					if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
+						creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
+						creature->CombatStop();
+						creature->DeleteFromDB();
+						creature->AddObjectToRemoveList();
+					}
+
+					delete creature;
+
+				} while (result->NextRow());
+			}
+
+			WorldDatabase.PQuery("DELETE FROM `creature` WHERE map = 1 AND phaseMask = %u", GetGuildPhase(guild));
+			WorldDatabase.PQuery("DELETE FROM `gameobject WHERE map = 1 and phaseMask = %u", GetGuildPhase(guild));
+
+			CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", GetGuildPhase(guild));
+		}
     }
 };
 
@@ -106,6 +133,51 @@ public:
                 return false;
             }
 
+			result = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(player));
+
+			if (result) {
+				Map* creatureMap = sMapMgr->FindMap(1, 0);
+				Creature* creature = nullptr;
+				do
+				{
+
+					Field* fields = result->Fetch();
+					uint64 lowguid = fields[0].GetInt64();
+
+					if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
+						creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
+						creature->CombatStop();
+						creature->DeleteFromDB();
+						creature->AddObjectToRemoveList();
+					}
+
+					delete creature;
+
+				} while (result->NextRow());
+			}
+
+			result = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(player));
+
+			if (result) {
+				Map* gobMap = sMapMgr->FindMap(1, 0);
+				GameObject* object = nullptr;
+				do
+				{
+					Field* fields = result->Fetch();
+					uint64 lowguid = fields[0].GetInt64();
+
+					if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
+						object = gobMap->GetGameObject(lowguid);
+						object->SetRespawnTime(0);
+						object->Delete();
+						object->DeleteFromDB();
+					}
+
+				} while (result->NextRow());
+			}
+
+			
+
             CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", player->GetGuildId());
 
             WorldDatabase.PQuery("DELETE FROM `creature` WHERE `map` = 1 AND phaseMask = %u", GetGuildPhase(player));
@@ -142,6 +214,10 @@ public:
 	uint32 GetGuildPhase(Player* player) {
 		return player->GetGuildId() + 10;
 	}
+	uint32 GetGuildPhase(Guild* guild) {
+		return guild->GetId() + 10;
+	}
+
 
 	void SpawnDalaranPortal(Player* player)
 	{
@@ -188,21 +264,21 @@ public:
 		GameObject* object = sObjectMgr->IsGameObjectStaticTransport(objectInfo->entry) ? new StaticTransport() : new GameObject();
 		uint32 guidLow = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-		if (!object->Create(guidLow, objectInfo->entry, player->GetMap(), GetGuildPhase(player), posX, posY, posZ, ori, G3D::Quat(), 0, GO_STATE_READY))
+		if (!object->Create(guidLow, objectInfo->entry, sMapMgr->FindMap(1, 0), GetGuildPhase(player->GetGuild()), posX, posY, posZ, ori, G3D::Quat(), 0, GO_STATE_READY))
 		{
 			delete object;
 			return;
 		}
 
 		// fill the gameobject data and save to the db
-		object->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), GetGuildPhase(player));
+		object->SaveToDB(sMapMgr->FindMap(1, 0)->GetId(), (1 << sMapMgr->FindMap(1, 0)->GetSpawnMode()), GetGuildPhase(player->GetGuild()));
 		// delete the old object and do a clean load from DB with a fresh new GameObject instance.
 		// this is required to avoid weird behavior and memory leaks
 		delete object;
 
 		object = sObjectMgr->IsGameObjectStaticTransport(objectInfo->entry) ? new StaticTransport() : new GameObject();
 		// this will generate a new guid if the object is in an instance
-		if (!object->LoadGameObjectFromDB(guidLow, player->GetMap()))
+		if (!object->LoadGameObjectFromDB(guidLow, sMapMgr->FindMap(1, 0)))
 		{
 			delete object;
 			return;
@@ -223,18 +299,18 @@ public:
 
 		Creature* creature = new Creature();
 
-		if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), player->GetMap(), GetGuildPhase(player), 70102, 0, posX, posY, posZ, ori))
+		if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), sMapMgr->FindMap(1, 0), GetGuildPhase(player->GetGuild()), 70102, 0, posX, posY, posZ, ori))
 		{
 			delete creature;
 			return;
 		}
-		creature->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), GetGuildPhase(player));
+		creature->SaveToDB(sMapMgr->FindMap(1, 0)->GetId(), (1 << sMapMgr->FindMap(1, 0)->GetSpawnMode()), GetGuildPhase(player->GetGuild()));
 		uint32 db_guid = creature->GetDBTableGUIDLow();
 
 		creature->CleanupsBeforeDelete();
 		delete creature;
 		creature = new Creature();
-		if (!creature->LoadCreatureFromDB(db_guid, player->GetMap()))
+		if (!creature->LoadCreatureFromDB(db_guid, sMapMgr->FindMap(1, 0)))
 		{
 			delete creature;
 			return;
@@ -405,6 +481,10 @@ public:
         return GuildHouseCommandBaseTable;
     }
 
+	static uint32 GetGuildPhase(Player* player) {
+		return player->GetGuildId() + 10;
+	}
+
     static bool HandleSpawnNPCCommand(ChatHandler* handler, char const* /*args*/)
     {
         Player* player = handler->GetSession()->GetPlayer();
@@ -434,14 +514,14 @@ public:
 
         Creature* creature = new Creature();
 
-        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), player->GetMap(), player->GetPhaseMask(), 70102, 0, posX, posY, posZ, ori))
+        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), player->GetMap(), GetGuildPhase(player), 70102, 0, posX, posY, posZ, ori))
         {
 			handler->SendSysMessage("You already have the Guild House Assistant!");
 			handler->SetSentErrorMessage(true);
             delete creature;
             return false;
         }
-        creature->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), player->GetPhaseMask());
+        creature->SaveToDB(player->GetMapId(), (1 << player->GetMap()->GetSpawnMode()), GetGuildPhase(player));
         uint32 db_guid = creature->GetDBTableGUIDLow();
 
         creature->CleanupsBeforeDelete();
