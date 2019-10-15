@@ -40,37 +40,57 @@ public:
 		return guild->GetId() + 10;
 	}
 
-	void OnRemoveMember(Guild* guild, Player* player, bool isDisbanding, bool /*isKicked*/)
+    void OnDisband(Guild* guild)
     {
-		if (isDisbanding) {
-			QueryResult result = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(guild));
+        QueryResult result = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(guild));
 
-			if (result) {
-				Map* creatureMap = sMapMgr->FindMap(1, 0);
-				Creature* creature = nullptr;
-				do
-				{
+        if (result) {
+            Map* creatureMap = sMapMgr->FindMap(1, 0);
+            Creature* creature = nullptr;
+            do
+            {
 
-					Field* fields = result->Fetch();
-					uint64 lowguid = fields[0].GetInt64();
-					
-					if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
-						creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
-						creature->CombatStop();
-						creature->DeleteFromDB();
-						creature->AddObjectToRemoveList();
-					}
+                Field* fields = result->Fetch();
+                uint32 lowguid = fields[0].GetInt32();
 
-					delete creature;
+                if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
+                    creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
+                    creature->CombatStop();
+                    creature->DeleteFromDB();
+                    creature->AddObjectToRemoveList();
+                    delete creature;
+                }
 
-				} while (result->NextRow());
-			}
 
-			WorldDatabase.PQuery("DELETE FROM `creature` WHERE map = 1 AND phaseMask = %u", GetGuildPhase(guild));
-			WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE map = 1 AND phaseMask = %u", GetGuildPhase(guild));
+            } while (result->NextRow());
+        }
 
-			CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", GetGuildPhase(guild));
-		}
+        /*result = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(guild));
+
+        if (result) {
+            Map* gobMap = sMapMgr->FindMap(1, 0);
+            GameObject* object = nullptr;
+            do
+            {
+                Field* fields = result->Fetch();
+                uint32 lowguid = fields[0].GetInt32();
+
+                if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
+                    object = gobMap->GetGameObject(gameObjectData->id);
+                    object->SetRespawnTime(0);
+                    object->DeleteFromDB();
+                    object->CleanupsBeforeDelete();
+                    delete object;
+                }
+
+            } while (result->NextRow());
+        }*/
+
+        WorldDatabase.PQuery("DELETE FROM `creature` WHERE map = 1 AND phaseMask = %u", GetGuildPhase(guild));
+        WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE map = 1 AND phaseMask = %u", GetGuildPhase(guild));
+
+        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", guild->GetId());
+        
     }
 };
 
@@ -142,39 +162,40 @@ public:
 				{
 
 					Field* fields = result->Fetch();
-					uint64 lowguid = fields[0].GetInt64();
+					uint32 lowguid = fields[0].GetInt32();
 
 					if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
 						creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
 						creature->CombatStop();
 						creature->DeleteFromDB();
 						creature->AddObjectToRemoveList();
+						delete creature;
 					}
 
-					delete creature;
 
 				} while (result->NextRow());
 			}
 
-			result = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(player));
+			/*result = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = %u and `map` = 1", GetGuildPhase(player));
 
-			if (result) {
-				Map* gobMap = sMapMgr->FindMap(1, 0);
-				GameObject* object = nullptr;
-				do
-				{
-					Field* fields = result->Fetch();
-					uint64 lowguid = fields[0].GetInt64();
+            if (result) {
+                Map* gobMap = sMapMgr->FindMap(1, 0);
+                GameObject* object = nullptr;
+                do
+                {
+                    Field* fields = result->Fetch();
+                    uint32 lowguid = fields[0].GetInt32();
 
-					if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
-						object = gobMap->GetGameObject(lowguid);
-						object->SetRespawnTime(0);
-						object->Delete();
-						object->DeleteFromDB();
-					}
+                    if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
+                        if (object = gobMap->GetGameObject(gameObjectData->id)) {
+                            object->SetRespawnTime(0);
+                            object->DeleteFromDB();
+                            object->CleanupsBeforeDelete();
+                        }
+                    }
 
-				} while (result->NextRow());
-			}
+                } while (result->NextRow());
+            }*/
 
 			
 
@@ -194,7 +215,7 @@ public:
             BuyGuildHouse(player->GetGuild(), player, m_creature);
             break;
         case 1: // teleport to guild house
-            TeleportGuildHouse(player->GetGuild(), player);
+            TeleportGuildHouse(player->GetGuild(), player, m_creature);
             break;
         }
 
@@ -339,13 +360,24 @@ public:
 
     }
 
-    void TeleportGuildHouse(Guild* guild, Player* player)
+    void TeleportGuildHouse(Guild* guild, Player* player, Creature* creature)
     {
         GuildData* guildData = player->CustomData.GetDefault<GuildData>("phase");
         QueryResult result = CharacterDatabase.PQuery("SELECT `phase`, `map`,`positionX`, `positionY`, `positionZ` FROM guild_house WHERE `guild` = %u", guild->GetId());
 
         if (!result)
         {
+            ClearGossipMenuFor(player);
+            if (player->GetGuild()->GetLeaderGUID() == player->GetGUID())
+            {
+                // Only leader of the guild can buy / sell guild house
+                AddGossipItemFor(player, GOSSIP_ICON_TABARD, "Buy Guild House!", GOSSIP_SENDER_MAIN, 2);
+                AddGossipItemFor(player, GOSSIP_ICON_TABARD, "Sell Guild House!", GOSSIP_SENDER_MAIN, 3, "Are you sure you want to sell your Guild house?", 0, false);
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_TABARD, "Teleport to Guild House", GOSSIP_SENDER_MAIN, 1);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Close", GOSSIP_SENDER_MAIN, 5);
+            SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
             ChatHandler(player->GetSession()).PSendSysMessage("Your Guild does not own a guild house");
             return;
         }
