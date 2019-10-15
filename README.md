@@ -20,9 +20,10 @@ All guilds will get their own phasing system which then the guild master will ha
 * Auctioneer
 
 ## How to use ingame
-1) As GM: .npc add 70101 -> somewhere public and accessible by other players.
+
+1) As GM: `.npc add 70101` -> somewhere public and accessible by other players.
 2) Purchase a guild house from the added NPC, then either teleport to the guildhouse via the NPC or chat: `.guildhouse tele`
-3) Once the player is in the location of the guild house the guild master has a command .guildhouse spawnnpc this will load the Guild House Assistant.
+3) Once the player is in the location of the guild house the guild master has a command .guildhouse SpawnNpc this will load the Guild House Assistant. (WIP: NPC automatically spawns as part of the purchase sequence)
 4) Speak with the Guild House Assistant to begin purchasing objects.
 
 ## Requirements
@@ -37,6 +38,7 @@ All guilds will get their own phasing system which then the guild master will ha
 3) Apply the guildhouse.patch to your source 
 4) Re-run cmake and launch a clean build of AzerothCore.
 ```
+
 ## Patch Information (guildhouse.patch)
 
 The patch basically turns the selected area from a bitmask to a uint, this fixes the issues with the phasing
@@ -57,6 +59,6 @@ If you need to change the module configuration, go to your server configuration 
 
 * [Talamortis](https://github.com/talamortis) (Original author of the module)
 * [Rochet2](https://github.com/Rochet2/): Thanks for the help with the phasing situation & General support
-* [Anhanga](https://github.com/rbedfordpro)
+* [Anhanga](https://github.com/rbedfordpro) & [WiZZy](https://github.com/wizzymore)
 
 AzerothCore: [repository](https://github.com/azerothcore) - [website](http://azerothcore.org/) - [discord chat community](https://discord.gg/64FH6Y8)
