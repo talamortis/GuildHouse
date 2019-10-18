@@ -191,11 +191,14 @@ public:
 
         if (action >= 100)
         {
-            CharacterDatabase.PQuery("INSERT INTO `guild_house` (guild, phase, map, positionX, positionY, positionZ) VALUES (%u, %u, %u, %f, %f, %f)", player->GetGuildId(), GetGuildPhase(player), map, posX, posY, posZ);
+            CharacterDatabase.PQuery("INSERT INTO `guild_house` (guild, phase, map, positionX, positionY, positionZ) VALUES (%u, %u, %u, %f, %f, %f)", 
+                player->GetGuildId(), GetGuildPhase(player), map, posX, posY, posZ);
             player->ModifyMoney(-(sConfigMgr->GetIntDefault("CostGuildHouse", 10000000)));
+            // Msg to purchaser and Msg Guild as purchaser 
             ChatHandler(player->GetSession()).PSendSysMessage("You have successfully purchased a guild house");
             player->GetGuild()->BroadcastToGuild(player->GetSession(), false, "We now have a Guild House!", LANG_UNIVERSAL);
             player->GetGuild()->BroadcastToGuild(player->GetSession(), false, "In chat, type `.guildhouse teleport` to meet me there!", LANG_UNIVERSAL);
+            // Spawn a portal and the guild assistant automatically as part of purchase.
             SpawnDalaranPortal(player);
             SpawnAssistantNPC(player);
         }
@@ -206,21 +209,23 @@ public:
         return player->GetGuildId() + 10;
     }
     
-    uint32 GetGuildPhase(Guild* guild) {
-        return guild->GetId() + 10;
-    }
-    
-
     bool RemoveGuildHouse(Player* player)
     {
 
         uint32 guildPhase = GetGuildPhase(player);
+        QueryResult CreatureResult;
+        QueryResult GameobjResult; 
+        bool go = true;
 
-        ChatHandler(player->GetSession()).PSendSysMessage("Selecting from gameobject where phaseMask = %u ", guildPhase);
-        QueryResult GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = %u AND `map` = 1", guildPhase);
+        try { 
+            ChatHandler(player->GetSession()).PSendSysMessage("Selecting from creature where phaseMask = %u ", guildPhase);   
+            CreatureResult = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = %u and `map` = 1", guildPhase);
+        } catch (...) {
+            ChatHandler(player->GetSession()).PSendSysMessage("Houston, we have a problem with the creature SELECT.");
+            go = false;
+          }
 
-        ChatHandler(player->GetSession()).PSendSysMessage("Selecting from creature where phaseMask = %u ", guildPhase);   
-        QueryResult CreatureResult = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = %u and `map` = 1", guildPhase);
+        if (!go){ return false; } // error in query, unsuccessful guild house delete
 
         if (CreatureResult) {
             Map* creatureMap = sMapMgr->FindMap(1, 0);
@@ -229,25 +234,35 @@ public:
             {
                 Field* fields = CreatureResult->Fetch();
                 uint32 lowguid = fields[0].GetInt32();
-                ChatHandler(player->GetSession()).PSendSysMessage("CREATURE Deleting: %u", lowguid);
+                ChatHandler(player->GetSession()).PSendSysMessage("Deleting creatures: %u", lowguid);
                 if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
                     creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
                     creature->CombatStop();
                     creature->DeleteFromDB();
                     creature->AddObjectToRemoveList();
-                    //delete creature;
+                    delete creature;
                 }
-           } while (CreatureResult->NextRow());
-        }    
+            } while (CreatureResult->NextRow());
+        } else {ChatHandler(player->GetSession()).PSendSysMessage("No creatures to delete?"); } 
+       
+        try {
+            ChatHandler(player->GetSession()).PSendSysMessage("Selecting from gameobject where phaseMask = %u ", guildPhase);
+            GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = %u AND `map` = 2", guildPhase);
+        } catch (...) {
+            ChatHandler(player->GetSession()).PSendSysMessage("Houston, we have a problem with the gameobject SELECT");
+            go = false;
+          }
 
-       if (GameobjResult) {
+        if (!go) { return false; } // error in query, unsuccessful guild house delete
+
+        if (GameobjResult) {
             Map* gobMap = sMapMgr->FindMap(1, 0);
             GameObject* object = nullptr;
             do
             {
                 Field* fields = GameobjResult->Fetch();
                 uint32 lowguid = fields[0].GetInt32();
-                ChatHandler(player->GetSession()).PSendSysMessage("GAMEOBJECT Deleting: %u", lowguid);
+                ChatHandler(player->GetSession()).PSendSysMessage("Deleting gameobjects: %u", lowguid);
                 if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
                     if (object == gobMap->GetGameObject(gameObjectData->id)) {
                         object->SetRespawnTime(0);
@@ -258,7 +273,7 @@ public:
                 }
 
             } while (GameobjResult->NextRow());
-        } 
+        } else {ChatHandler(player->GetSession()).PSendSysMessage("No gameobjects to delete?"); }
         
         // Perform database deletes to clean up, although this may happen above in object->DeleteFromDB() & creature->DeleteFromDB()
         CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", player->GetGuildId());
@@ -274,7 +289,7 @@ public:
     void SpawnDalaranPortal(Player* player)
     {
         // 195682 - Dalaran portal enterable by alliance
-        uint32 entry = 191164;
+        uint32 entry = 195682;
         float posX;
         float posY;
         float posZ;

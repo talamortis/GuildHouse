@@ -103,7 +103,6 @@ public:
                 AddGossipItemFor(player, GOSSIP_ICON_TAXI, "Portal: Thunderbluff", GOSSIP_SENDER_MAIN, 183326, "Add Thunderbuff Portal?", GuildHousePortal,  false);
                 AddGossipItemFor(player, GOSSIP_ICON_TAXI, "Portal: Silvermoon", GOSSIP_SENDER_MAIN, 183324, "Add Silvermoon Portal?", GuildHousePortal,  false);
             }
-            AddGossipItemFor(player, GOSSIP_ICON_TAXI, "Portal: Dalaran", GOSSIP_SENDER_MAIN, 191164, "Add Dalaran Portal?", GuildHousePortal,  false);
             AddGossipItemFor(player, GOSSIP_ICON_TAXI, "Portal: Shattrath", GOSSIP_SENDER_MAIN, 191013, "Add Shattrath Portal?", GuildHousePortal, false);
             AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, "Guild Vault", GOSSIP_SENDER_MAIN, 187293, "Add Guild Vault?", GuildHouseObject,  false);
             AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Barber Chair", GOSSIP_SENDER_MAIN, 191028, "Add a Barber Chair?", GuildHouseObject,  false);
@@ -218,7 +217,6 @@ public:
         case 183326: // Thunder bluff portal
         case 183324: // Silvermoon Portal
         case 183321: // Exodar Portal
-        case 191164: // Dalaran Portal
         case 191013: // Shattrath Portal:Alliance
         case 191014: // Shattrath Portal:Horde
             cost = GuildHousePortal;
