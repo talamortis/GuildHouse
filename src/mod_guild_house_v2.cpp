@@ -215,72 +215,73 @@ public:
         uint32 guildPhase = GetGuildPhase(player);
         QueryResult CreatureResult;
         QueryResult GameobjResult; 
-        bool go = true;
 
-        try { 
-            ChatHandler(player->GetSession()).PSendSysMessage("Selecting from creature where phaseMask = %u ", guildPhase);   
-            CreatureResult = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = %u and `map` = 1", guildPhase);
-        } catch (...) {
-            ChatHandler(player->GetSession()).PSendSysMessage("Houston, we have a problem with the creature SELECT.");
-            go = false;
-          }
+        // Lets find all of the gameobjects to be removed       
+        ChatHandler(player->GetSession()).PSendSysMessage("Selecting from gameobject where phaseMask = %u ", guildPhase);
+        GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = '%u' AND `map` = 1", guildPhase);
+        // Lets find all of the creatures to be removed
+        ChatHandler(player->GetSession()).PSendSysMessage("Selecting from creature where phaseMask = %u ", guildPhase);   
+        CreatureResult = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = '%u' and `map` = 1", guildPhase);
 
-        if (!go){ return false; } // error in query, unsuccessful guild house delete
 
+        sLog->outBasic("Removing gameobjects");
+        // remove gameobjects from the deleted guild house map
+        if (GameobjResult) {
+            Map* gobMap = sMapMgr->FindMap(1, 0);
+            GameObject* gobject = nullptr;
+            do
+            {
+                Field* fields = GameobjResult->Fetch();
+                uint32 lowguid = fields[0].GetInt32();
+                if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
+                    if ((gobject = gobMap->GetGameObject(gameObjectData->id))) {
+                        if (!gobject){ sLog->outBasic("NULL gobject"); return false; }
+                        sLog->outBasic("Deleting gameobject: %u", lowguid);
+                        gobject->SetRespawnTime(0);
+                        gobject->Delete();
+                        gobject->DeleteFromDB();
+                        gobject->CleanupsBeforeDelete();
+                        delete gobject;
+                        sLog->outBasic("Completed deletion of gameobject: %u", lowguid);
+                    }
+                }
+
+            } while (GameobjResult->NextRow());
+        }
+        
+
+        sLog->outBasic("Removing creatures");
+        // remove creatures from the deleted guild house map
         if (CreatureResult) {
             Map* creatureMap = sMapMgr->FindMap(1, 0);
+            if (!creatureMap) { sLog->outBasic("NULL creatureMap"); return false; }
             Creature* creature = nullptr;
             do
             {
                 Field* fields = CreatureResult->Fetch();
                 uint32 lowguid = fields[0].GetInt32();
-                ChatHandler(player->GetSession()).PSendSysMessage("Deleting creatures: %u", lowguid);
+                sLog->outBasic("Deleting creatures: %u", lowguid);
                 if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
+                    if (!cr_data) { sLog->outBasic("Data for %u not found in `creature` table.", lowguid); return false; }
+                    sLog->outBasic("cr_data->id: %u, lowguid: %u, HIGHGUID_UNIT: %u", cr_data->id, lowguid, HIGHGUID_UNIT);
                     creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
+                    if (!creature) { sLog->outBasic("NULL Creature!"); return false; }
                     creature->CombatStop();
                     creature->DeleteFromDB();
                     creature->AddObjectToRemoveList();
-                    delete creature;
+                    sLog->outBasic("Completed deletion of creature: %u", lowguid);
                 }
             } while (CreatureResult->NextRow());
         } else {ChatHandler(player->GetSession()).PSendSysMessage("No creatures to delete?"); } 
-       
-        try {
-            ChatHandler(player->GetSession()).PSendSysMessage("Selecting from gameobject where phaseMask = %u ", guildPhase);
-            GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = %u AND `map` = 2", guildPhase);
-        } catch (...) {
-            ChatHandler(player->GetSession()).PSendSysMessage("Houston, we have a problem with the gameobject SELECT");
-            go = false;
-          }
 
-        if (!go) { return false; } // error in query, unsuccessful guild house delete
 
-        if (GameobjResult) {
-            Map* gobMap = sMapMgr->FindMap(1, 0);
-            GameObject* object = nullptr;
-            do
-            {
-                Field* fields = GameobjResult->Fetch();
-                uint32 lowguid = fields[0].GetInt32();
-                ChatHandler(player->GetSession()).PSendSysMessage("Deleting gameobjects: %u", lowguid);
-                if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
-                    if (object == gobMap->GetGameObject(gameObjectData->id)) {
-                        object->SetRespawnTime(0);
-                        object->DeleteFromDB();
-                        object->CleanupsBeforeDelete();
-                        delete object;
-                    }
-                }
-
-            } while (GameobjResult->NextRow());
-        } else {ChatHandler(player->GetSession()).PSendSysMessage("No gameobjects to delete?"); }
-        
         // Perform database deletes to clean up, although this may happen above in object->DeleteFromDB() & creature->DeleteFromDB()
-        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = %u", player->GetGuildId());
-        ChatHandler(player->GetSession()).PSendSysMessage("Deleting from creature where phaseMask = %u ", guildPhase); 
-        WorldDatabase.PQuery("DELETE FROM `creature` WHERE `map` = 1 AND phaseMask = %u", guildPhase);
-        ChatHandler(player->GetSession()).PSendSysMessage("Deleting from gameobject where phaseMask = %u ", guildPhase);
-        WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `map` = 1 and phaseMask = %u", guildPhase);
+        ChatHandler(player->GetSession()).PSendSysMessage("Deleting from guild_house where guild = %u ", player->GetGuildId());
+        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = '%u'", player->GetGuildId());
+        ChatHandler(player->GetSession()).PSendSysMessage("Deleting from creature where phaseMask = '%u' ", guildPhase); 
+        WorldDatabase.PQuery("DELETE FROM `creature` WHERE `map` = 1 AND phaseMask = '%u'", guildPhase);
+        ChatHandler(player->GetSession()).PSendSysMessage("Deleting from gameobject where phaseMask = '%u' ", guildPhase);
+        WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `map` = 1 and phaseMask = '%u'", guildPhase);
 
         return true;
 
@@ -309,13 +310,6 @@ public:
             ori = fields[3].GetFloat();
 
         } while (result->NextRow());
-
-        if (player->FindNearestGameObject(entry, VISIBLE_RANGE))
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("You already have this object!");
-            CloseGossipMenuFor(player);
-            return;
-        }
 
         uint32 objectId = entry;
         if (!objectId)
