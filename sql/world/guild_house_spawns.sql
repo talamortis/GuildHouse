@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `guild_house_spawns` (
   UNIQUE KEY `entry` (`entry`)
 ) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
 
--- Dumping data for table acore_world.guild_house_spawns: ~55 rows (approximately)
+-- Dumping data for table acore_world.guild_house_spawns: ~56 rows (approximately)
 /*!40000 ALTER TABLE `guild_house_spawns` DISABLE KEYS */;
 REPLACE INTO `guild_house_spawns` (`id`, `entry`, `posX`, `posY`, `posZ`, `orientation`, `comment`) VALUES
 	(1, 26327, 16216.5, 16279.4, 20.9306, 0.552869, 'Paladin Trainer'),
@@ -96,7 +96,8 @@ REPLACE INTO `guild_house_spawns` (`id`, `entry`, `posX`, `posY`, `posZ`, `orien
     (52, 191013, 16203, 16216, 1.10669, 1.0453, 'Portal: Shattrath (Object) - Alliance'),
     (53, 29636, 16233.5, 16316.1, 20.8455, 3.07558, 'Reagent Vendor'),
     (54, 191014, 16203, 16216, 1.10669, 1.0453, 'Portal: Shattrath (Object) - Horde'),
-    (55, 70104, 16242.8, 16302.1, 13.174, 4.6153, 'Ammo & Repair Vendor');
+    (55, 70104, 16242.8, 16302.1, 13.174, 4.6153, 'Ammo & Repair Vendor'),
+    (56, 28690, 16226.97, 16267.9, 13.15, 4.6533, 'Stable Master');
 	
 /*!40000 ALTER TABLE `guild_house_spawns` ENABLE KEYS */;
 
