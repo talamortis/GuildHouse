@@ -52,76 +52,64 @@ public:
 
     bool RemoveGuildHouse(Guild* guild)
     {
-        // TODO: Determine cost of all purchased items and return that value so we can calculate
+
         uint32 guildPhase = GetGuildPhase(guild);
         QueryResult CreatureResult;
-        QueryResult GameobjResult; 
+        QueryResult GameobjResult;
+        Map* map = sMapMgr->FindMap(1,0);
 
-        // Lets find all of the gameobjects to be removed       
-        GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `phaseMask` = '%u' AND `map` = 1", guildPhase);
+        // Lets find all of the gameobjects to be removed
+        GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `map` = 1 AND `phaseMask` = '%u'", guildPhase);
         // Lets find all of the creatures to be removed
-        CreatureResult = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `phaseMask` = '%u' and `map` = 1", guildPhase);
+        CreatureResult = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `map` = 1 AND `phaseMask` = '%u'", guildPhase);
 
 
-        sLog->outBasic("GUILDHOUSE: Removing gameobjects from guildhouse");
-        // remove gameobjects from the deleted guild house map
-        if (GameobjResult) {
-            Map* gobMap = sMapMgr->FindMap(1, 0);
-            GameObject* gobject = nullptr;
-            do
-            {
-                Field* fields = GameobjResult->Fetch();
-                uint32 lowguid = fields[0].GetInt32();
-                if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
-                    if ((gobject = gobMap->GetGameObject(gameObjectData->id))) {
-                        if (!gobject){ sLog->outBasic("GUILDHOUSE: NULL gobject"); return false; }
-                        gobject->SetRespawnTime(0);
-                        gobject->Delete();
-                        gobject->DeleteFromDB();
-                        gobject->CleanupsBeforeDelete();
-                        delete gobject;
-                        sLog->outBasic("GUILDHOUSE: Completed deletion of gameobject: %u", lowguid);
-                    }
-                }
-
-            } while (GameobjResult->NextRow());
-        }
-        
-
-        sLog->outBasic("GUILDHOUSE: Removing creatures from guildhouse");
         // remove creatures from the deleted guild house map
         if (CreatureResult) {
-            Map* creatureMap = sMapMgr->FindMap(1, 0);
-            if (!creatureMap) { sLog->outBasic("GUILDHOUSE: NULL creatureMap"); return false; }
             do
             {
                 Field* fields = CreatureResult->Fetch();
                 uint32 lowguid = fields[0].GetInt32();
                 if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
-                    if (!cr_data) { sLog->outBasic("GUILDHOUSE: Data for %u not found in `creature` table.", lowguid); return false; }
                     if (Creature* creature = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT), (Creature*)NULL))
                     {
-                        //creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
-                        if (!creature) { sLog->outBasic("GUILDHOUSE: NULL Creature!"); return false; }
                         creature->CombatStop();
                         creature->DeleteFromDB();
                         creature->AddObjectToRemoveList();
-                        delete creature;
-                        sLog->outBasic("GUILDHOUSE: Completed deletion of creature: %u", lowguid);
-                    } else { sLog->outBasic("We probably still aren't finding a creature match..."); return false; }
+                    }
                 }
             } while (CreatureResult->NextRow());
         }
 
-        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE guild = '%u'", guild->GetId());
-        //WorldDatabase.PQuery("DELETE FROM `creature` WHERE `map` = 1 AND phaseMask = '%u'", guildPhase);
-        //WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `map` = 1 and phaseMask = '%u'", guildPhase);
+
+        // remove gameobjects from the deleted guild house map
+        if (GameobjResult) {
+            do
+            {
+                Field* fields = GameobjResult->Fetch();
+                uint32 lowguid = fields[0].GetInt32();
+                if (GameObjectData const* go_data = sObjectMgr->GetGOData(lowguid)) {
+                    //if (GameObject* gobject = ObjectAccessor::GetObjectInWorld(lowguid, (GameObject*)NULL))
+                    if (GameObject* gobject = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(lowguid, go_data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
+                    {
+                        gobject->SetRespawnTime(0);
+                        gobject->Delete();
+                        gobject->DeleteFromDB();
+                        gobject->CleanupsBeforeDelete();
+                        //delete gobject;
+                    }
+                }
+
+            } while (GameobjResult->NextRow());
+        }
+
+        // Delete actual guild_house data from characters database
+        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE `guild` = '%u'", player->GetGuildId());
 
         return true;
 
-    }
+    } 
 
-};
 
 class GuildHouseSeller : public CreatureScript {
 
@@ -239,7 +227,8 @@ public:
     uint32 GetGuildPhase(Player* player) {
         return player->GetGuildId() + 10;
     }
-    
+
+
     bool RemoveGuildHouse(Player* player)
     {
 
@@ -256,7 +245,6 @@ public:
 
         // remove creatures from the deleted guild house map
         if (CreatureResult) {
-            sLog->outBasic("GUILDHOUSE: Removing creatures from guildhouse");
             do
             {
                 Field* fields = CreatureResult->Fetch();
@@ -264,11 +252,9 @@ public:
                 if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
                     if (Creature* creature = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT), (Creature*)NULL))
                     {
-                        if (!creature) { sLog->outBasic("GUILDHOUSE: NULL Creature!"); return false; }
                         creature->CombatStop();
                         creature->DeleteFromDB();
                         creature->AddObjectToRemoveList();
-                        sLog->outBasic("GUILDHOUSE: Completed deletion of creature: %u", lowguid);
                     } 
                 }
             } while (CreatureResult->NextRow());
@@ -277,28 +263,24 @@ public:
 
         // remove gameobjects from the deleted guild house map
         if (GameobjResult) {
-            sLog->outBasic("GUILDHOUSE: Removing gameobjects from guildhouse");
             do
             {
                 Field* fields = GameobjResult->Fetch();
                 uint32 lowguid = fields[0].GetInt32();
-                sLog->outBasic("GUILDHOUSE: Starting deletion of gameobject: %u", lowguid);
                 if (GameObjectData const* go_data = sObjectMgr->GetGOData(lowguid)) {
-                    sLog->outBasic("GUILDHOUSE: lowguid: '%u', go_data->id: '%u', HIGHGUID_GAMEOBJECT: '%u'", lowguid, go_data->id, HIGHGUID_GAMEOBJECT);
-                    if (GameObject* gobject = ObjectAccessor::GetObjectInWorld(lowguid, (GameObject*)NULL))
+                    //if (GameObject* gobject = ObjectAccessor::GetObjectInWorld(lowguid, (GameObject*)NULL))
+                    if (GameObject* gobject = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(lowguid, go_data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
                     {
                         gobject->SetRespawnTime(0);
                         gobject->Delete();
                         gobject->DeleteFromDB();
                         gobject->CleanupsBeforeDelete();
-                        delete gobject;
-                        WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `guid` = '%u'", lowguid);
-                        sLog->outBasic("GUILDHOUSE: Completed deletion of gameobject: %u", lowguid);
-                    } else { sLog->outBasic("GUILDHOUSE: gobject IS NULL, when it shouldn't be. "); return false; }
-                } else { sLog->outBasic("GUILDHOUSE: sObjectMgr->GetGOData(lowguid) returned NULL"); return false; }
+                        //delete gobject;
+                    } 
+                } 
 
             } while (GameobjResult->NextRow());
-        } else { sLog->outBasic("GUILDHOUSE: What?? For some reason GameobjResult is NULL?"); return false;}
+        }
         
         // Delete actual guild_house data from characters database
         CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE `guild` = '%u'", player->GetGuildId());
