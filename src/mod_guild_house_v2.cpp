@@ -206,7 +206,6 @@ public:
                 ChatHandler(player->GetSession()).PSendSysMessage("There was an error selling your guild house.");
                 CloseGossipMenuFor(player);
                 }
-            CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE `guild` = '%u'", player->GetGuildId());
             break;
         }
         case 2: // buy guild house
@@ -247,6 +246,7 @@ public:
         uint32 guildPhase = GetGuildPhase(player);
         QueryResult CreatureResult;
         QueryResult GameobjResult; 
+        Map* map = sMapMgr->FindMap(1,0);
 
         // Lets find all of the gameobjects to be removed       
         GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `map` = 1 AND `phaseMask` = '%u'", guildPhase);
@@ -254,46 +254,16 @@ public:
         CreatureResult = WorldDatabase.PQuery("SELECT `guid` FROM `creature` WHERE `map` = 1 AND `phaseMask` = '%u'", guildPhase);
 
 
-        sLog->outBasic("GUILDHOUSE: Removing gameobjects from guildhouse");
-        // remove gameobjects from the deleted guild house map
-        if (GameobjResult) {
-            Map* gobMap = sMapMgr->FindMap(1, 0);
-            GameObject* gobject = nullptr;
-            do
-            {
-                Field* fields = GameobjResult->Fetch();
-                uint32 lowguid = fields[0].GetInt32();
-                if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(lowguid)) {
-                    if ((gobject = gobMap->GetGameObject(gameObjectData->id))) {
-                        if (!gobject){ sLog->outBasic("GUILDHOUSE: NULL gobject"); return false; }
-                        gobject->SetRespawnTime(0);
-                        gobject->Delete();
-                        gobject->DeleteFromDB();
-                        gobject->CleanupsBeforeDelete();
-                        delete gobject;
-                        WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `guid` = '%u'", lowguid);
-                        sLog->outBasic("GUILDHOUSE: Completed deletion of gameobject: %u", lowguid);
-                    }
-                }
-
-            } while (GameobjResult->NextRow());
-        }
-        
-
-        sLog->outBasic("GUILDHOUSE: Removing creatures from guildhouse");
         // remove creatures from the deleted guild house map
         if (CreatureResult) {
-            Map* creatureMap = sMapMgr->FindMap(1, 0);
-            if (!creatureMap) { sLog->outBasic("GUILDHOUSE: NULL creatureMap"); return false; }
+            sLog->outBasic("GUILDHOUSE: Removing creatures from guildhouse");
             do
             {
                 Field* fields = CreatureResult->Fetch();
                 uint32 lowguid = fields[0].GetInt32();
                 if (CreatureData const* cr_data = sObjectMgr->GetCreatureData(lowguid)) {
-                    if (!cr_data) { sLog->outBasic("GUILDHOUSE: Data for %u not found in `creature` table.", lowguid); return false; }
                     if (Creature* creature = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT), (Creature*)NULL))
                     {
-                        //creature = creatureMap->GetCreature(MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
                         if (!creature) { sLog->outBasic("GUILDHOUSE: NULL Creature!"); return false; }
                         creature->CombatStop();
                         creature->DeleteFromDB();
@@ -304,6 +274,34 @@ public:
             } while (CreatureResult->NextRow());
         }
 
+
+        // remove gameobjects from the deleted guild house map
+        if (GameobjResult) {
+            sLog->outBasic("GUILDHOUSE: Removing gameobjects from guildhouse");
+            do
+            {
+                Field* fields = GameobjResult->Fetch();
+                uint32 lowguid = fields[0].GetInt32();
+                sLog->outBasic("GUILDHOUSE: Starting deletion of gameobject: %u", lowguid);
+                if (GameObjectData const* go_data = sObjectMgr->GetGOData(lowguid)) {
+                    sLog->outBasic("GUILDHOUSE: lowguid: '%u', go_data->id: '%u', HIGHGUID_GAMEOBJECT: '%u'", lowguid, go_data->id, HIGHGUID_GAMEOBJECT);
+                    if (GameObject* gobject = ObjectAccessor::GetObjectInWorld(lowguid, (GameObject*)NULL))
+                    {
+                        gobject->SetRespawnTime(0);
+                        gobject->Delete();
+                        gobject->DeleteFromDB();
+                        gobject->CleanupsBeforeDelete();
+                        delete gobject;
+                        WorldDatabase.PQuery("DELETE FROM `gameobject` WHERE `guid` = '%u'", lowguid);
+                        sLog->outBasic("GUILDHOUSE: Completed deletion of gameobject: %u", lowguid);
+                    } else { sLog->outBasic("GUILDHOUSE: gobject IS NULL, when it shouldn't be. "); return false; }
+                } else { sLog->outBasic("GUILDHOUSE: sObjectMgr->GetGOData(lowguid) returned NULL"); return false; }
+
+            } while (GameobjResult->NextRow());
+        } else { sLog->outBasic("GUILDHOUSE: What?? For some reason GameobjResult is NULL?"); return false;}
+        
+        // Delete actual guild_house data from characters database
+        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE `guild` = '%u'", player->GetGuildId());
 
         return true;
 
@@ -375,7 +373,6 @@ public:
         GameObject* object = sObjectMgr->IsGameObjectStaticTransport(objectInfo->entry) ? new StaticTransport() : new GameObject();
         uint32 guidLow = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-        sLog->outBasic("GUILDHOUSE: Found portal(%u) to place: posX: %f, posY: %f, posZ: %f | Created '%u'", entry, posX, posY, posZ, guidLow);
 
         if (!object->Create(guidLow, objectInfo->entry, map, GetGuildPhase(player), posX, posY, posZ, ori, G3D::Quat(), 0, GO_STATE_READY))
         {
@@ -402,7 +399,6 @@ public:
         // TODO: is it really necessary to add both the real and DB table guid here ?
         sObjectMgr->AddGameobjectToGrid(guidLow, sObjectMgr->GetGOData(guidLow));
         CloseGossipMenuFor(player);
-        sLog->outBasic("GUILDHOUSE: Supposedly we just loaded the portal with id: '%u'", entry);
     }
 
     void SpawnAssistantNPC(Player* player)
