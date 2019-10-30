@@ -25,11 +25,11 @@ public:
     float posZ;
 };
 
-class GuildHelper : public GuildScript{
+class GuildHelper : public GuildScript {
 
 public:
 
-    GuildHelper() : GuildScript("GuildHelper") { }
+    GuildHelper() : GuildScript("GuildHelper") {}
 
     void OnCreate(Guild*, Player* leader, const std::string&)
     {
@@ -107,7 +107,7 @@ public:
 
         return true;
 
-    } 
+    }
 
 };
 
@@ -484,6 +484,7 @@ public:
 
     void OnUpdateZone(Player* player, uint32 newZone, uint32 newArea)
     {
+        newArea = newArea; // Seriously? Just because Travis bombs out if we don't use a variable.
         if (newZone == 876)
             CheckPlayer(player);
         else
@@ -512,7 +513,7 @@ public:
             do {
 
                 Field* fields = result->Fetch();
-                uint32 id = fields[0].GetUInt32();
+                //uint32 id = fields[0].GetUInt32();  // fix for travis
                 uint32 guild = fields[1].GetUInt32();
                 guildData->phase = fields[2].GetUInt32();
                 uint32 map = fields[3].GetUInt32();
