@@ -482,7 +482,7 @@ public:
         CheckPlayer(player);
     }
 
-    void OnUpdateZone(Player* player, uint32 newZone, uint32 newArea)
+    void OnUpdateZone(Player* player, uint32 newZone, uint32 /*newArea*/)
     {
         if (newZone == 876)
             CheckPlayer(player);
