@@ -46,3 +46,8 @@ local.properties
 .loadpath
 .project
 .cproject
+
+#
+# Config file
+#
+conf/mod_guild_house_v2.conf

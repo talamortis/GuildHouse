@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `guild_house_spawns` (
   UNIQUE KEY `entry` (`entry`)
 ) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
 
--- Dumping data for table acore_world.guild_house_spawns: ~29 rows (approximately)
+-- Dumping data for table acore_world.guild_house_spawns: ~56 rows (approximately)
 /*!40000 ALTER TABLE `guild_house_spawns` DISABLE KEYS */;
 REPLACE INTO `guild_house_spawns` (`id`, `entry`, `posX`, `posY`, `posZ`, `orientation`, `comment`) VALUES
 	(1, 26327, 16216.5, 16279.4, 20.9306, 0.552869, 'Paladin Trainer'),
@@ -86,12 +86,18 @@ REPLACE INTO `guild_house_spawns` (`id`, `entry`, `posX`, `posY`, `posZ`, `orien
 	(41, 183326, 16202.1, 16223.1, 1.03401, 0.829316, 'Portal: Thunder Bluff (Object)'),
 	(42, 183324, 16196.8, 16227.5, 1.37206, 0.762557, 'Portal: Silvermoon (Object)'),
 	(43, 183321, 16196.8, 16227.5, 1.37206, 0.762557, 'Portal: Exodar (Object)'),
-	(44, 191164, 16206, 16216, 1.10669, 1.0453, 'Portal: Dalaran (Object)'),
+	(44, 195682, 16207, 16216, 1.10669, 1.0453, 'Portal: Dalaran (Object)'),
 	(45, 187293, 16230.5, 16283.5, 13.9061, 3, 'Guild Vault (Object)'),
 	(46, 28692, 16230.2, 16316.4, 20.8455, 6.25643, 'Trade Supplies'),
 	(48, 28776, 16236.3, 16316.1, 20.8454, 3.06771, 'Tabard Vendor'),
-	(49, 29715, 16223.7, 16293.3, 20.852, 4.57958, 'Food & Drink'),
-	(50, 191028, 16255.5, 16304.9, 20.9785, 2.97516, 'Barber Chair (Object)');
+	(49, 70103, 16223.7, 16293.3, 20.852, 4.57958, 'Food & Drink'),
+    (50, 6491, 16319.937, 16242.404, 24.4747, 2.206830, 'Spirit Healer'),
+    (51, 191028, 16255.5, 16304.9, 20.9785, 2.97516, 'Barber Chair (Object)'),
+    (52, 191013, 16203, 16216, 1.10669, 1.0453, 'Portal: Shattrath (Object) - Alliance'),
+    (53, 29636, 16233.5, 16316.1, 20.8455, 3.07558, 'Reagent Vendor'),
+    (54, 191014, 16203, 16216, 1.10669, 1.0453, 'Portal: Shattrath (Object) - Horde'),
+    (55, 70104, 16242.8, 16302.1, 13.174, 4.6153, 'Ammo & Repair Vendor'),
+    (56, 28690, 16226.97, 16267.9, 13.15, 4.6533, 'Stable Master');
 	
 /*!40000 ALTER TABLE `guild_house_spawns` ENABLE KEYS */;
 

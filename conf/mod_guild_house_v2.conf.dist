@@ -63,9 +63,29 @@ GuildHouseObject = 500000
 #
 GuildHousePortal = 1000000
 
-# GuildHouseProff
+# GuildHouseProf
 #
 # Cost of profession vendors within the guild.
 # default = 500000 (50g)
 #
-GuildHouseProff = 500000
+GuildHouseProf = 500000
+
+# GuildHouseSpirit
+#
+# Cost of Spirit Healer at the guildhouse graveyard .
+# default = 100000 (10g)
+#
+GuildHouseSpirit = 100000
+
+# GuildHouseBuyRank
+#
+# Minimum GuildRank able to make purchases in guild house
+# default = 0 (Guild Master)
+# GR_GUILDMASTER  = 0
+# GR_OFFICER      = 1
+# GR_VETERAN      = 2
+# GR_MEMBER       = 3
+# GR_INITIATE     = 4
+#
+GuildHouseBuyRank = 0
+
