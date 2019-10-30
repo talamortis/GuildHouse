@@ -510,15 +510,15 @@ public:
         if (result)
         {
             do {
-
+                                                            // commented out due to travis, but keeping for future expansion into other areas
                 Field* fields = result->Fetch();
-                //uint32 id = fields[0].GetUInt32();  // fix for travis
-                uint32 guild = fields[1].GetUInt32();
+                //uint32 id = fields[0].GetUInt32();        // fix for travis
+                //uint32 guild = fields[1].GetUInt32();     // fix for travis
                 guildData->phase = fields[2].GetUInt32();
-                uint32 map = fields[3].GetUInt32();
-                guildData->posX = fields[4].GetFloat();
-                guildData->posY = fields[5].GetFloat();
-                guildData->posZ = fields[6].GetFloat();
+                //uint32 map = fields[3].GetUInt32();       // fix for travis
+                //guildData->posX = fields[4].GetFloat();   // fix for travis
+                //guildData->posY = fields[5].GetFloat();   // fix for travis
+                //guildData->posZ = fields[6].GetFloat();   // fix for travis
 
             } while (result->NextRow());
         }
