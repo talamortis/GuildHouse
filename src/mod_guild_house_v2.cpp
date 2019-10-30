@@ -482,7 +482,7 @@ public:
         CheckPlayer(player);
     }
 
-    void OnUpdateZone(Player* player, uint32 newZone, uint32 newArea)
+    void OnUpdateZone(Player* player, uint32 newZone, uint32 /*newArea*/)
     {
         newArea = newArea; // Seriously? Just because Travis bombs out if we don't use a variable.
         if (newZone == 876)
