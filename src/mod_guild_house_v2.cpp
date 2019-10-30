@@ -56,7 +56,6 @@ public:
         uint32 guildPhase = GetGuildPhase(guild);
         QueryResult CreatureResult;
         QueryResult GameobjResult;
-        Map* map = sMapMgr->FindMap(1,0);
 
         // Lets find all of the gameobjects to be removed
         GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `map` = 1 AND `phaseMask` = '%u'", guildPhase);
@@ -236,7 +235,6 @@ public:
         uint32 guildPhase = GetGuildPhase(player);
         QueryResult CreatureResult;
         QueryResult GameobjResult; 
-        Map* map = sMapMgr->FindMap(1,0);
 
         // Lets find all of the gameobjects to be removed       
         GameobjResult = WorldDatabase.PQuery("SELECT `guid` FROM `gameobject` WHERE `map` = 1 AND `phaseMask` = '%u'", guildPhase);
