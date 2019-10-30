@@ -104,12 +104,13 @@ public:
         }
 
         // Delete actual guild_house data from characters database
-        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE `guild` = '%u'", player->GetGuildId());
+        CharacterDatabase.PQuery("DELETE FROM `guild_house` WHERE `guild` = '%u'", guild->GetId());
 
         return true;
 
     } 
 
+};
 
 class GuildHouseSeller : public CreatureScript {
 
