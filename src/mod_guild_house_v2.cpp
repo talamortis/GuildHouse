@@ -656,8 +656,8 @@ public:
         do {
 
             Field* fields = result->Fetch();
-            uint32 id = fields[0].GetUInt32();
-            uint32 guild = fields[1].GetUInt32();
+            //uint32 id = fields[0].GetUInt32();        // fix for travis
+            //uint32 guild = fields[1].GetUInt32();     // fix for travis
             guildData->phase = fields[2].GetUInt32();
             uint32 map = fields[3].GetUInt32();
             guildData->posX = fields[4].GetFloat();
